@@ -1,13 +1,55 @@
 from django.db import models
 from django.shortcuts import render  
 from wagtail.core.models import Page
-from wagtail.admin.edit_handlers import FieldPanel, StreamFieldPanel
+from wagtail.admin.edit_handlers import(
+    FieldPanel, 
+    StreamFieldPanel,
+    MultiFieldPanel,
+) 
 from wagtail.core.fields import StreamField
 from streams import blocks
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.contrib.routable_page.models import RoutablePageMixin, route
+from wagtail.snippets.models import register_snippet
+
 
 # Create your models here.
+
+class BlogAuthor(models.Model):
+    name = models.CharField(max_length=100)
+    website = models.URLField(blank=True, null=True)
+    image = models.ForeignKey(
+        "wagtailimages.Image",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=False,
+        related_name='+'
+    )
+    panels = [
+        MultiFieldPanel(
+            [
+                FieldPanel("name"),
+                ImageChooserPanel("image"),
+
+            ],
+            heading = "Name and Image"
+        ),
+        MultiFieldPanel(
+            [
+                FieldPanel("website"),
+            ],
+            heading="Links"
+        )
+    ]
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name= "Blog Author"
+        verbose_name_plural = "Blog Authors"
+
+register_snippet(BlogAuthor)
 
 class BlogListingPage(RoutablePageMixin,Page):
 
@@ -30,6 +72,7 @@ class BlogListingPage(RoutablePageMixin,Page):
         #context['extra'] = "Read all about it"
         #context["regular_context_var"] = "hellooooo"
         #context["a_special_link"] = self.reverse_subpage("latest_posts")
+        context["authors"] = BlogAuthor.object.all()
         return context 
 
     @route(r'^latest/?$', name="latest_posts")
