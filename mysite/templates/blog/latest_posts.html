@@ -1,12 +1,14 @@
 {% extends "base.html" %}
 
-{% load wagtailimages_tags wagtailroutablepage_tags %}
+{% load wagtailimages_tags %}
 
 {% block content %}
-    <a href="{% routablepageurl page 'latest_posts' %}">View Latest Posts Only</a>
-    <!-- <h2>special link is {{ a_special_link }}</h2> -->
     <div class="container">
-        {% for post in posts %}
+        <!-- <h1>Latest Posts {{ regular_context_var }}</h1>
+        #......-->
+        <h1>Latest Posts </h1>
+        <!-- <h2>{{ name }} : {{ website }}</h2> -->
+        {% for post in latest_posts %}
             <div class="row mt-5 mb-5">
                 <div class="col-sm-3">
                     {% image post.blog_image fill-250x250 as blog_img %}
@@ -20,7 +22,7 @@
                         {# @todo add a summary field to BlogDetailPage; make it a RichTextField with only Bold and Italic enabled. #}
                         <a href="{{ post.url }}" class="btn btn-primary mt-4">Read More</a>
                     </a>
-                </div>    
+                </div>
             </div>
         {% endfor %}
     </div>  
