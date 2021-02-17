@@ -1,5 +1,6 @@
 from django.db import models
 from django.shortcuts import render  
+from django import forms
 from wagtail.core.models import Page, Orderable
 from wagtail.admin.edit_handlers import(
     FieldPanel, 
@@ -13,7 +14,7 @@ from streams import blocks
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.contrib.routable_page.models import RoutablePageMixin, route
 from wagtail.snippets.models import register_snippet
-from modelcluster.fields import ParentalKey
+from modelcluster.fields import ParentalKey, ParentalManyToManyField
 
 # Create your models here.
 
@@ -65,6 +66,31 @@ class BlogAuthor(models.Model):
 
 register_snippet(BlogAuthor)
 
+
+class BlogCategory(models.Model):
+    name = models.CharField(max_length=255)
+    slug = models.SlugField(
+        verbose_name="slug",
+        allow_unicode=True,
+        max_length=255,
+        help_text="A slug to identify posts by this category",
+    )
+    panels = [
+        FieldPanel("name"),
+        FieldPanel("slug"),
+    ]   
+
+    class Meta:
+        verbose_name = "Blog Category"
+        verbose_name_plural = "Blog Categories"
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name    
+
+register_snippet(BlogCategory)
+
+
 class BlogListingPage(RoutablePageMixin,Page):
 
     template = "blog/blog_listing_page.html"
@@ -86,10 +112,11 @@ class BlogListingPage(RoutablePageMixin,Page):
         #context['extra'] = "Read all about it"
         #context["regular_context_var"] = "hellooooo"
         #context["a_special_link"] = self.reverse_subpage("latest_posts")
-        context["authors"] = BlogAuthor.object.all()
+        #context["authors"] = BlogAuthor.object.all()
+        context["categories"] = BlogCategory.objects.all()
         return context 
 
-    @route(r'^latest/?$', name="latest_posts")
+    @route(r'^latest/$', name="latest_posts")
     def latest_blog_posts_only_shows_last_5(self, request, *args, **kwargs):
         context = self.get_context(request,*args,**kwargs)
         #context["posts"] = context["posts"][:1]
@@ -114,6 +141,9 @@ class BlogDetailPage(Page):
         related_name = "+",
         on_delete= models.SET_NULL,
     )
+
+    categories = ParentalManyToManyField("blog.BlogCategory",blank=True,)
+
     content = StreamField(
         [
             ("title_and_text", blocks.TitleAndTextBlock()),
@@ -131,9 +161,15 @@ class BlogDetailPage(Page):
         StreamFieldPanel("content"),
         MultiFieldPanel(
             [
-                InlinePanel("blog_authors", label="Author", min_num=1, max_num=4)
+                InlinePanel("blog_authors", label="Author", min_num=0, max_num=4)
             ],
             heading="Author(s)"
+        ),
+        MultiFieldPanel(
+            [
+               FieldPanel("categories", widget=forms.CheckboxSelectMultiple) 
+            ],
+            heading="Categories"
         ),
     ]
 
