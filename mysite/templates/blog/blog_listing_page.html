@@ -7,9 +7,9 @@
     <!-- <h2>special link is {{ a_special_link }}</h2> -->
     <h2>Categories</h2>
     <ul>
-        {% for cat in categories %}
+        {% for cats in categories %}
         <li>
-            <a href="?category={{ cat.slug }}">{{ cat.name }}</a>
+            <a href="?category={{ cats.slug }}">{{ cats.name }}</a>
             
         </li>
         {% endfor %}
