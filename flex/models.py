@@ -6,6 +6,7 @@ from streams import blocks
 
 class FlexPage(Page):
     template = "flex/flex_page.html"
+    subpage_types = ['flex.FlexPage', 'contact.ContactPage']
 
     content = StreamField(
         [

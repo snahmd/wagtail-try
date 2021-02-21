@@ -30,6 +30,12 @@ class HomePageCarouselImages(Orderable):
 
 class HomePage(RoutablePageMixin,Page):
     templates = "home/home_page"
+    subpage_types = [
+        'blog.BlogListingPage',
+        'contact.ContactPage',
+        'flex.FlexPage',
+    ]
+    max_count = 1
 
     banner_title = models.CharField(max_length=100, blank= True, null=True)
     banner_subtitle = RichTextField(features=["bold","italic"])

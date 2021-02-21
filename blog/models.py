@@ -95,7 +95,8 @@ register_snippet(BlogCategory)
 class BlogListingPage(RoutablePageMixin,Page):
 
     template = "blog/blog_listing_page.html"
-
+    max_count = 1
+    subpage_types = ['blog.VideoBlogPage','blog.ArticleBlogPage', 'blog.BlogDetailPage']
     custom_title = models.CharField(
         max_length=100,
         blank=False,
@@ -139,6 +140,8 @@ class BlogListingPage(RoutablePageMixin,Page):
 
 class BlogDetailPage(Page):
 
+    subpage_types = []
+    
     custom_title = models.CharField(
         max_length=100,
         blank=False,
