@@ -14,6 +14,8 @@ from wagtail.contrib.routable_page.models import RoutablePageMixin, route
 # from wagtail.core.fields import StreamField
 from streams import blocks
 
+from wagtail.admin.edit_handlers import ObjectList, TabbedInterface
+
 class HomePageCarouselImages(Orderable):
     page = ParentalKey("home.HomePage", related_name="carousel_images")
     carousel_image = models.ForeignKey(
@@ -63,21 +65,38 @@ class HomePage(RoutablePageMixin,Page):
     )
 
     content_panels = Page.content_panels + [
-        MultiFieldPanel([
-            FieldPanel("banner_title"),
-            FieldPanel("banner_subtitle"),
-            ImageChooserPanel("banner_image"),
-            PageChooserPanel("banner_cta"),
-        ], heading= "Banner Options"),
+       
         
         MultiFieldPanel([
             InlinePanel("carousel_images",max_num=5, min_num=1,label="Image"),
         ], heading= "Carousel Images"),
         
-        StreamFieldPanel("content"),
-        
-        
+        StreamFieldPanel("content"),  
     ]
+
+    banner_panels = [
+        MultiFieldPanel(
+            [
+                FieldPanel("banner_title"),
+                FieldPanel("banner_subtitle"),
+                ImageChooserPanel("banner_image"),
+                PageChooserPanel("banner_cta"),
+            ], 
+            heading= "Banner Options"
+        ),
+    ]
+
+    # promote_panels = []
+    # settings_panels = []
+
+    edit_handler = TabbedInterface(
+        [
+            ObjectList(content_panels, heading = 'Content'),
+            ObjectList(Page.promote_panels, heading='Promotional Stuff'),
+            ObjectList(Page.settings_panels, heading= 'Settings Stuff'),
+            ObjectList(banner_panels, heading="Banner Settings")
+        ]
+    )
 
     class Meta:
         verbose_name = "Home Page"
