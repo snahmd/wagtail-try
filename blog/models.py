@@ -16,7 +16,8 @@ from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.contrib.routable_page.models import RoutablePageMixin, route
 from wagtail.snippets.models import register_snippet
 from modelcluster.fields import ParentalKey, ParentalManyToManyField
-
+from modelcluster.contrib.taggit import ClusterTaggableManager
+from taggit.models import TaggedItemBase
 # Create your models here.
 
 class BlogAuthorsOrderable(Orderable):
@@ -111,6 +112,9 @@ class BlogListingPage(RoutablePageMixin,Page):
     def get_context(self, request, *args, **kwargs):
         context = super().get_context(request,*args,**kwargs)
         all_posts = BlogDetailPage.objects.live().public().order_by("-first_published_at")
+        if request.GET.get('tag', None):
+            tags = request.GET.get('tag')
+            all_posts = all_posts.filter(tags__slug__in=[tags])
         paginator = Paginator(all_posts, 2)
         page = request.GET.get("page")
         try:
@@ -138,10 +142,19 @@ class BlogListingPage(RoutablePageMixin,Page):
         return render(request, "blog/latest_posts.html", context)
 
 
+class BlogPageTag(TaggedItemBase):
+    content_object = ParentalKey(
+        'BlogDetailPage',
+        related_name= 'tagged_items',
+        on_delete=models.CASCADE,
+
+    )
+
+
 class BlogDetailPage(Page):
 
     subpage_types = []
-    
+    tags = ClusterTaggableManager(through=BlogPageTag, blank=True)
     custom_title = models.CharField(
         max_length=100,
         blank=False,
@@ -171,6 +184,7 @@ class BlogDetailPage(Page):
     )
     content_panels = Page.content_panels + [
         FieldPanel("custom_title"),
+        FieldPanel("tags"),
         ImageChooserPanel("banner_image"),
         StreamFieldPanel("content"),
         MultiFieldPanel(
@@ -205,6 +219,7 @@ class ArticleBlogPage(BlogDetailPage):
     content_panels = Page.content_panels + [
         FieldPanel("custom_title"),
         FieldPanel("subtitle"),
+        FieldPanel("tags"),
         ImageChooserPanel("banner_image"),
         ImageChooserPanel("intro_image"),
         StreamFieldPanel("content"),

@@ -8,6 +8,13 @@
     {% image self.blog_image fill-1200x400 as banner %}
     <img src="{{ banner.url }}" alt="{{ banner.alt }}" style="width:100%; height:auto;">
     <div class="container mt-5 mb-5">
+        {% if page.tags.count %}
+        <h1>Tags:</h1>
+            {% for tag in page.tags.all %}
+                {# Loop through all the existing tags #}
+                <a href="{{ self.get_parent.url }}?tag={{ tag.slug }}">{{ tag }}</a><br />
+            {% endfor %}
+        {% endif %}
         <div class="text-center">
             <h1>{{ self.custom_title }}</h1>
             <div class="d-flex justify-content-center">

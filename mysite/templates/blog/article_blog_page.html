@@ -7,6 +7,10 @@
 {% block content %}
     {% image self.banner_image fill-1200x400 as banner %}
     <img src="{{ banner.url }}" alt="{{ banner.alt }}" style="width:100%; height:auto;">
+    <h1>Tags:</h1>
+    {% for tag in page.tags.all %}
+        <a href="/blog/?tag={{ tag.slug }}">{{ tag }} -- {{ tag.slug }}</a><br/>
+    {% endfor %}
     <div class="container mt-5 mb-5">
         <div class="text-center">
             <h1>
